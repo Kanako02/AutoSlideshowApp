@@ -71,14 +71,27 @@ class MainActivity(var cnt: Int) : AppCompatActivity(),  View.OnClickListener{
 
     }
 
-    //進むボタンと戻るボタン
+    //進むボタンと戻るボタン   corsorをメンバ変数に変更
     override fun onClick(v: View) {
         if (v.id == R.id.next_button){
+            if (cursor!!.moveToNext()) {
+                // indexからIDを取得し、そのIDから画像のURIを取得する
+                val fieldIndex = cursor.getColumnIndex(MediaStore.Images.Media._ID)
+                val id = cursor.getLong(fieldIndex)
+                val imageUri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id)
 
-            imageView.setImageURI()
-
+                imageView.setImageURI(imageUri)
+            }
 
         }else if (v.id == R.id.back_button){
+            if (cursor!!.moveToPrevious()) {
+                // indexからIDを取得し、そのIDから画像のURIを取得する
+                val fieldIndex = cursor.getColumnIndex(MediaStore.Images.Media._ID)
+                val id = cursor.getLong(fieldIndex)
+                val imageUri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id)
+
+                imageView.setImageURI(imageUri)
+            }
 
         }
 
