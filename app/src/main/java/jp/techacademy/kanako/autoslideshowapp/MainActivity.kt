@@ -5,18 +5,25 @@ import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.content.pm.PackageManager
 import android.os.Build
-import android.util.Log
 import android.provider.MediaStore
 import android.content.ContentUris
+import android.net.Uri
+import android.view.View
 import kotlinx.android.synthetic.main.activity_main.*
 
-class MainActivity : AppCompatActivity() {
+class MainActivity(var cnt: Int) : AppCompatActivity(),  View.OnClickListener{
 
     private val PERMISSIONS_REQUEST_CODE = 100
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+//ボタン追加
+        next_button.setOnClickListener(this)
+        pause_button.setOnClickListener(this)
+        back_button.setOnClickListener(this)
 
         // Android 6.0以降の場合
           if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -33,6 +40,21 @@ class MainActivity : AppCompatActivity() {
           } else {
               getContentsInfo()
           }
+
+
+    }
+
+    //進むボタンと戻るボタン
+    override fun onClick(v: View) {
+        if (v.id == R.id.next_button){
+
+            imageView.setImageURI()
+
+
+        }else if (v.id == R.id.back_button){
+
+        }
+
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
@@ -44,7 +66,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun getContentsInfo() {
+    private fun getContentsInfo(mutableList: Any) {
         // 画像の情報を取得する
         val resolver = contentResolver
         val cursor = resolver.query(
@@ -55,6 +77,7 @@ class MainActivity : AppCompatActivity() {
             null // ソート (null ソートなし)
         )
 
+//開いた時最初の画像表示
         if (cursor!!.moveToFirst()) {
                 // indexからIDを取得し、そのIDから画像のURIを取得する
                 val fieldIndex = cursor.getColumnIndex(MediaStore.Images.Media._ID)
@@ -63,15 +86,25 @@ class MainActivity : AppCompatActivity() {
 
                imageView.setImageURI(imageUri)
         }
-        cursor.close()
+
+
+
+        if (cursor!!.moveToFirst()){
+            do {
+                val fieldIndex = cursor.getColumnIndex(MediaStore.Images.Media._ID)
+                val id = cursor.getLong(fieldIndex)
+                val imageUri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id)
+
+
+            }while (cursor.moveToNext())
+
+            cursor.close()
+        }
+
     }
 
 
-
-
-
 }
-
 
 
 
