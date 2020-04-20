@@ -30,7 +30,7 @@
             android:id="@+id/pause_button"
             android:layout_width="100dp"
             android:layout_height="wrap_content"
-            android:text="再生/停止" />
+            android:text="再生" />
 
         <Button
             android:id="@+id/back_button"

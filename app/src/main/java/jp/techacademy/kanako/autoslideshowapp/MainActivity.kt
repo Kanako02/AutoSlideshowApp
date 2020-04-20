@@ -7,23 +7,25 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.provider.MediaStore
 import android.content.ContentUris
-import android.net.Uri
 import android.view.View
 import kotlinx.android.synthetic.main.activity_main.*
+import java.util.*
+import android.os.Handler
+import kotlin.concurrent.schedule
 
 class MainActivity(var cnt: Int) : AppCompatActivity(),  View.OnClickListener{
 
     private val PERMISSIONS_REQUEST_CODE = 100
 
+    private var mTimer: Timer? = null
+
+    // タイマー用の時間のための変数
+    private var mTimerSec = 0.0
+    private var mHandler = Handler()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
-//ボタン追加
-        next_button.setOnClickListener(this)
-        pause_button.setOnClickListener(this)
-        back_button.setOnClickListener(this)
 
         // Android 6.0以降の場合
           if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -40,6 +42,31 @@ class MainActivity(var cnt: Int) : AppCompatActivity(),  View.OnClickListener{
           } else {
               getContentsInfo()
           }
+        //ボタン追加
+        next_button.setOnClickListener(this)
+        back_button.setOnClickListener(this)
+
+        //再生・停止ボタン
+        fun slide() {
+
+        }
+        pause_button.setOnClickListener{
+            if (pause_button.text == "再生"){
+                mTimer = Timer()
+
+                mTimer!!.schedule(object : TimerTask()){
+                    fun run(){
+                        mHandler.post{
+                            slide()
+                            pause_button.text = "停止"
+                        }
+                    }
+                }
+
+
+            }
+        }
+
 
 
     }
@@ -66,7 +93,7 @@ class MainActivity(var cnt: Int) : AppCompatActivity(),  View.OnClickListener{
         }
     }
 
-    private fun getContentsInfo(mutableList: Any) {
+    private fun getContentsInfo() {
         // 画像の情報を取得する
         val resolver = contentResolver
         val cursor = resolver.query(
@@ -79,27 +106,26 @@ class MainActivity(var cnt: Int) : AppCompatActivity(),  View.OnClickListener{
 
 //開いた時最初の画像表示
         if (cursor!!.moveToFirst()) {
-                // indexからIDを取得し、そのIDから画像のURIを取得する
-                val fieldIndex = cursor.getColumnIndex(MediaStore.Images.Media._ID)
-                val id = cursor.getLong(fieldIndex)
-                val imageUri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id)
+            // indexからIDを取得し、そのIDから画像のURIを取得する
+            val fieldIndex = cursor.getColumnIndex(MediaStore.Images.Media._ID)
+            val id = cursor.getLong(fieldIndex)
+            val imageUri =
+                ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id)
 
-               imageView.setImageURI(imageUri)
+            imageView.setImageURI(imageUri)
+        }
+
+//次の画像を表示
+        if (cursor!!.moveToNext()) {
+            // indexからIDを取得し、そのIDから画像のURIを取得する
+            val fieldIndex = cursor.getColumnIndex(MediaStore.Images.Media._ID)
+            val id = cursor.getLong(fieldIndex)
+            val imageUri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id)
+
+            imageView.setImageURI(imageUri)
         }
 
 
-
-        if (cursor!!.moveToFirst()){
-            do {
-                val fieldIndex = cursor.getColumnIndex(MediaStore.Images.Media._ID)
-                val id = cursor.getLong(fieldIndex)
-                val imageUri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id)
-
-
-            }while (cursor.moveToNext())
-
-            cursor.close()
-        }
 
     }
 
